@@ -1,3 +1,5 @@
+# project/__init__.py
+
 import os
 import datetime
 from flask import Flask, jsonify

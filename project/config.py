@@ -1,3 +1,6 @@
+# project/config.py
+
+
 import os
 
 class BaseConfig:
@@ -5,6 +8,7 @@ class BaseConfig:
     DEBUG = False
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = 'my_precious'
 
 
 class DevelopmentConfig(BaseConfig):
@@ -16,7 +20,7 @@ class DevelopmentConfig(BaseConfig):
 class TestingConfig(BaseConfig):
     """Testing Configuration"""
     DEBUG = True
-    Testing = True
+    TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_TEST_URL')
 
 
