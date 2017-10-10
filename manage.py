@@ -1,20 +1,16 @@
 # manage.py
 
-
-from flask_script import Manager
 import unittest
 
-from project import app, db
+from flask_script import Manager
 
+from project import create_app, db
+from project.api.models import User
+
+
+app = create_app()
 manager = Manager(app)
 
-
-@manager.command
-def recreate_db():
-    """Recreates a database"""
-    db.drop_all()
-    db.create_all()
-    db.session.commit()
 
 @manager.command
 def test():
@@ -24,6 +20,15 @@ def test():
     if result.wasSuccessful():
         return 0
     return 1
+
+
+@manager.command
+def recreate_db():
+    """Recreates a database"""
+    db.drop_all()
+    db.create_all()
+    db.session.commit()
+
 
 
 
