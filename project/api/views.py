@@ -10,7 +10,10 @@ from project import db
 users_blueprint = Blueprint('users', __name__)
 
 
+
+
 # routes
+
 
 @users_blueprint.route('/ping', methods=['GET'])
 def ping_pong():
@@ -20,6 +23,8 @@ def ping_pong():
         'status': 'success',
         'message': 'pong!'
     })
+
+
 
 
 @users_blueprint.route('/users', methods=['POST'])
@@ -33,7 +38,7 @@ def add_user():
     if not post_data:
         response_object = {
             'status': 'fail',
-            'message': 'Invalid payload.'
+            'message': 'Invalid payload'
         }
         return jsonify(response_object), 400
 
@@ -55,7 +60,7 @@ def add_user():
         else:
             response_object = {
                 'status': 'fail',
-                'message': 'Sorry, that email already exists.'
+                'message': 'Sorry, that email already exists'
             }
             return jsonify(response_object), 400
 
@@ -65,6 +70,40 @@ def add_user():
         db.session.rollback()
         response_object = {
             'status': 'fail',
-            'message': 'Invalid payload.'
+            'message': 'Invalid payload'
         }
         return jsonify(response_object), 400
+
+
+
+
+@users_blueprint.route('/users/<user_id>', methods=['GET'])
+def get_single_user(user_id):
+    """Get single user details"""
+    
+    # default error
+    response_object = {
+        'status': 'fail',
+        'message': 'User does not exist'
+    }
+
+    # get user by query
+    try:
+        user = User.query.filter_by(id=int(user_id)).first()
+        # user doesn't exist
+        if not user:
+            return jsonify(response_object), 404
+        else:
+            response_object = {
+                'status': 'success',
+                'data': {
+                    'username': user.username,
+                    'email': user.email,
+                    'created_at': user.created_at
+                }
+            }
+            return jsonify(response_object), 200
+
+    # invalid id
+    except ValueError:
+        return jsonify(response_object), 404
