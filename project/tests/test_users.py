@@ -8,6 +8,18 @@ from project.tests.base import BaseTestCase
 from project.api.models import User
 
 
+# helper functions 
+
+def add_user(username, email):
+    """Helper for adding users to database"""
+    user = User(username=username, email=email)
+    db.session.add(user)
+    db.session.commit()
+    return user
+
+
+
+# tests
 
 class TestUserService(BaseTestCase):
     """Tests for the Users Service."""
@@ -38,7 +50,6 @@ class TestUserService(BaseTestCase):
                 content_type='application/json',
             )
             data = json.loads(response.data.decode())
-
             # expected response
             self.assertEqual(response.status_code, 201)
             self.assertIn('evan@example.com was added!', data['message'])
@@ -55,7 +66,6 @@ class TestUserService(BaseTestCase):
                 content_type='application/json',
             )
             data = json.loads(response.data.decode())
-
             # expected response
             self.assertEqual(response.status_code, 400)
             self.assertIn('Invalid payload', data['message'])
@@ -72,7 +82,6 @@ class TestUserService(BaseTestCase):
                 content_type='application/json',
             )
             data = json.loads(response.data.decode())
-
             # expected response
             self.assertEqual(response.status_code, 400)
             self.assertIn('Invalid payload', data['message'])
@@ -102,7 +111,6 @@ class TestUserService(BaseTestCase):
                 content_type='application/json',
             )
             data = json.loads(response.data.decode())
-
             # expected response
             self.assertEqual(response.status_code, 400)
             self.assertIn('Sorry, that email already exists', data['message'])
@@ -117,14 +125,11 @@ class TestUserService(BaseTestCase):
     def test_single_user(self):
         """Ensure get single user behaves correctly"""
         # db state
-        user =  User(username='evan', email='evan@example.com')
-        db.session.add(user)
-        db.session.commit()
+        user =  add_user(username='evan', email='evan@example.com')
         with self.client:
             # request recieved
             response = self.client.get(f'/users/{user.id}')
             data = json.loads(response.data.decode())
-
             # expected response
             self.assertEqual(response.status_code, 200)
             self.assertTrue('created_at' in data['data'])
@@ -139,7 +144,6 @@ class TestUserService(BaseTestCase):
             # request received
             response = self.client.get('/users/blah')
             data = json.loads(response.data.decode())
-
             # expected response
             self.assertEqual(response.status_code, 404)
             self.assertIn('User does not exist', data['message'])
@@ -152,8 +156,36 @@ class TestUserService(BaseTestCase):
             # request received
             response = self.client.get('/users/999')
             data = json.loads(response.data.decode())
-
             #expected response
             self.assertEqual(response.status_code, 404)
             self.assertIn('User does not exist', data['message'])
             self.assertIn('fail', data['status'])
+
+
+    """
+    GET all users
+    """
+
+    def test_all_users(self):
+        # db state
+        add_user('evan', 'evan@example.com')
+        add_user('palmer', 'palmer@example.com')
+        with self.client:
+            # request received
+            response = self.client.get('/users')
+            data = json.loads(response.data.decode())
+            # response expected
+            self.assertEqual(response.status_code, 200)
+            # ensure 2 users
+            self.assertEqual(len(data['data']['users']), 2)
+            # ensure create_at is not null
+            self.assertTrue('created_at' in data['data']['users'][0])
+            self.assertTrue('created_at' in data['data']['users'][1])
+            # 1st user
+            self.assertIn('evan', data['data']['users'][0]['username'])
+            self.assertIn('evan@example.com', data['data']['users'][0]['email'])
+            # 2nd user
+            self.assertIn('palmer', data['data']['users'][1]['username'])
+            self.assertIn('palmer@example.com', data['data']['users'][1]['email'])
+            # response message
+            self.assertIn('success', data['status'])

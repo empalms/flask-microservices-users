@@ -24,12 +24,18 @@ def test():
 
 @manager.command
 def recreate_db():
-    """Recreates a database"""
+    """Recreates a database."""
     db.drop_all()
     db.create_all()
     db.session.commit()
 
 
+@manager.command
+def seed_db():
+    """Seeds the database."""
+    db.session.add(User(username='evan', email='evan@example.com'))
+    db.session.add(User(username='palmer', email='palmer@example.com'))
+    db.session.commit()
 
 
 if __name__ == '__main__':
