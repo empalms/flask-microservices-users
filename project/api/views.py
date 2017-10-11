@@ -1,18 +1,39 @@
 # project/api/views.py
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from sqlalchemy import exc
 
 from project.api.models import User
 from project import db
 
 # instantiate users blueprint
-users_blueprint = Blueprint('users', __name__)
+users_blueprint = Blueprint('users', __name__, template_folder='./templates')
 
 
 
 
 # routes
+
+
+@users_blueprint.route('/', methods=['GET', 'POST'])
+def index():
+    """Returns index HTML template"""
+
+    # if request is POST (i.e. new user is submitted)
+
+    if request.method == 'POST':
+        # get user request
+        username = request.form['username']
+        email = request.form['email']
+        # create new user in db
+        db.session.add(User(username=username, email=email))
+        db.session.commit()
+    
+    # handle GET - show all users
+    users = User.query.order_by(User.created_at.desc()).all()
+    return render_template('index.html', users=users)
+
+
 
 
 @users_blueprint.route('/ping', methods=['GET'])

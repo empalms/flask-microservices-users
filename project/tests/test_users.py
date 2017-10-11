@@ -32,7 +32,61 @@ class TestUserService(BaseTestCase):
         self.assertIn('pong!', data['message'])
         self.assertIn('success', data['status'])
 
+
+
+    """
+    Test main route
+    """
+
+    def test_main_no_users(self):
+        """
+        Ensure the main route behaves correctly when 
+        no users have been added to the database.
+        """
+        # request received
+        response = self.client.get('/')
+        # expected response
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'<h1>All Users</h1>', response.data)
+        self.assertIn(b'<p>No users!</p>', response.data)
+
+
+    def test_main_with_users(self):
+        """
+        Ensure the main route behaves correctly when users have been
+        added to the database.
+        """
+        # db state
+        add_user('evan', 'evan@example.com')
+        add_user('palmer', 'palmer@example.com')
+        # request received
+        response = self.client.get('/')
+        # expected response
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'<h1>All Users</h1>', response.data)
+        self.assertNotIn(b'<p>No users!</p>', response.data)
+        self.assertIn(b'<strong>evan</strong>', response.data)
+        self.assertIn(b'<strong>palmer</strong>', response.data)
  
+    
+    def test_main_add_user(self):
+        """Ensure a new user can be added to the database."""
+        with self.client:
+            # request received
+            response = self.client.post(
+                '/',
+                data=dict(username='evan', email='evan@example.com'),
+                follow_redirects=True
+            )
+            # expected response
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'<h1>All Users</h1>', response.data)
+            self.assertNotIn(b'<p>No users!</p>', response.data)
+            self.assertIn(b'<strong>evan</strong>', response.data)
+
+
+
+
     """
     Test users POST route
     """
