@@ -25,7 +25,7 @@ class TestDevelopmentConfig(TestCase):
         self.assertFalse(current_app is None)
         self.assertTrue(
             app.config['SQLALCHEMY_DATABASE_URI'] ==
-            os.envrion.get('DATABASE_URL')
+            os.environ.get('DATABASE_URL')
         )
 
 
