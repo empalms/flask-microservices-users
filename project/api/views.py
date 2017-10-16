@@ -30,7 +30,7 @@ users_blueprint = Blueprint('users', __name__, template_folder='./templates')
 #         # create new user in db
 #         db.session.add(User(username=username, email=email))
 #         db.session.commit()
-    
+
 #     # handle GET - show all users
 #     users = User.query.order_by(User.created_at.desc()).all()
 #     return render_template('index.html', users=users)
@@ -103,7 +103,7 @@ def add_user():
 @users_blueprint.route('/users/<user_id>', methods=['GET'])
 def get_single_user(user_id):
     """Get single user details"""
-    
+
     # default error
     response_object = {
         'status': 'fail',
@@ -137,8 +137,8 @@ def get_single_user(user_id):
 @users_blueprint.route('/users', methods=['GET'])
 def get_all_users():
     """Get all users"""
-    # remember query
-    users = User.query.all()
+    # remember query and sort users by date in descending order
+    users = User.query.order_by(User.created_at.desc()).all()
 
     # initalize user list
     users_list = []

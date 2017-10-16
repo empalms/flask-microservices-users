@@ -2,6 +2,7 @@
 
 
 import json
+import datetime
 
 from project import db
 from project.tests.base import BaseTestCase
@@ -10,9 +11,9 @@ from project.api.models import User
 
 # helper functions 
 
-def add_user(username, email):
+def add_user(username, email, created_at=datetime.datetime.utcnow()):
     """Helper for adding users to database"""
-    user = User(username=username, email=email)
+    user = User(username=username, email=email, created_at=created_at)
     db.session.add(user)
     db.session.commit()
     return user
@@ -221,8 +222,10 @@ class TestUserService(BaseTestCase):
     """
 
     def test_all_users(self):
+        """Ensure get all users behaves correctly"""
         # db state
-        add_user('evan', 'evan@example.com')
+        created = datetime.datetime.utcnow() + datetime.timedelta(-30)
+        add_user('evan', 'evan@example.com', created)
         add_user('palmer', 'palmer@example.com')
         with self.client:
             # request received
@@ -232,14 +235,14 @@ class TestUserService(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             # ensure 2 users
             self.assertEqual(len(data['data']['users']), 2)
-            # ensure create_at is not null
+            # ensure created_at is not null
             self.assertTrue('created_at' in data['data']['users'][0])
             self.assertTrue('created_at' in data['data']['users'][1])
             # 1st user
-            self.assertIn('evan', data['data']['users'][0]['username'])
-            self.assertIn('evan@example.com', data['data']['users'][0]['email'])
+            self.assertIn('evan', data['data']['users'][1]['username'])
+            self.assertIn('evan@example.com', data['data']['users'][1]['email'])
             # 2nd user
-            self.assertIn('palmer', data['data']['users'][1]['username'])
-            self.assertIn('palmer@example.com', data['data']['users'][1]['email'])
+            self.assertIn('palmer', data['data']['users'][0]['username'])
+            self.assertIn('palmer@example.com', data['data']['users'][0]['email'])
             # response message
             self.assertIn('success', data['status'])
